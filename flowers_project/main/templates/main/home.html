@@ -1,0 +1,30 @@
+<!-- main/templates/main/home.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Добро пожаловать на сайт доставки цветов!</h1>
+    <p>Выберите свои любимые букеты и оформите заказ прямо сейчас.</p>
+
+    <h2>Наши букеты</h2>
+    <div class="row">
+        {% for flower in flowers %}
+        <div class="col-md-4">
+            <div class="card mb-4">
+                {% if flower.image %}
+                <img src="{{ flower.image.url }}" class="card-img-top" alt="{{ flower.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ flower.name }}</h5>
+                    <p class="card-text">{{ flower.description }}</p>
+                    <p class="card-text"><strong>Цена: {{ flower.price }} руб.</strong></p>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>В данный момент букеты отсутствуют.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
