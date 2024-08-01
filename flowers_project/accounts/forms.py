@@ -15,10 +15,10 @@ class UserRegisterForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['email', 'first_name', 'last_name', 'phone_number', 'password1', 'password2']
-        field_classes = {'email': forms.EmailField}
 
-    def __init__(self, *args, **kwargs):
-        super(UserRegisterForm, self).__init__(*args, **kwargs)
-        # Удаление подсказок для всех полей
-        for fieldname in ['email', 'first_name', 'last_name', 'phone_number', 'password1', 'password2']:
-            self.fields[fieldname].help_text = None
+    def save(self, commit=True):
+        user = super(UserRegisterForm, self).save(commit=False)
+        user.username = self.cleaned_data['email']  # Установка username равным email
+        if commit:
+            user.save()
+        return user

@@ -8,14 +8,19 @@ from django.contrib.auth import authenticate, login
 
 def user_login(request):
     if request.method == 'POST':
-        username = request.POST['username']
-        password = request.POST['password']
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            return redirect('home')
-        else:
-            messages.error(request, 'Неправильный логин или пароль')
+        email = request.POST.get('email')  # Получаем email вместо username
+        password = request.POST.get('password')
+        try:
+            user = User.objects.get(email=email)  # Пытаемся найти пользователя по email
+            user_auth = authenticate(request, username=user.username, password=password)  # Аутентификация по username и паролю
+            if user_auth is not None:
+                login(request, user_auth)
+                messages.success(request, f'Добро пожаловать, {user.first_name}!')
+                return redirect('home')  # Перенаправление на главную страницу после входа
+            else:
+                messages.error(request, 'Неправильный логин или пароль')
+        except User.DoesNotExist:
+            messages.error(request, 'Пользователь с такой электронной почтой не найден')
     return render(request, 'accounts/login.html')
 
 
