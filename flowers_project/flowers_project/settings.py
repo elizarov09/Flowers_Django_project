@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',  # приложение для управления пользователями
     'main',      # приложение для главной страницы
+    'catalog',  # Новое приложение для каталога
 ]
 
 MIDDLEWARE = [
