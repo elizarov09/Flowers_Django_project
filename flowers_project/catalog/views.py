@@ -1,5 +1,8 @@
 # catalog/views.py
 
+from django.shortcuts import redirect, get_object_or_404
+from .models import CartItem  # Предположим, что у вас есть модель CartItem для элементов корзины
+
 from django.shortcuts import render, get_object_or_404, redirect  # Добавьте redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -34,3 +37,14 @@ def view_cart(request):
     cart_items = CartItem.objects.filter(user=request.user)
     total = sum(item.total_price() for item in cart_items)
     return render(request, 'catalog/cart.html', {'cart_items': cart_items, 'total': total})
+
+
+def remove_from_cart(request, item_id):
+    # Получаем элемент корзины или возвращаем 404, если его нет
+    cart_item = get_object_or_404(CartItem, id=item_id)
+
+    # Удаляем элемент из корзины
+    cart_item.delete()
+
+    # Перенаправляем обратно на страницу корзины
+    return redirect('view_cart')
