@@ -22,3 +22,13 @@ class CartItem(models.Model):
 
     def total_price(self):
         return self.flower.price * self.quantity
+
+class Order(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    delivery_address = models.CharField(max_length=255)
+    delivery_date = models.DateField()
+    delivery_time = models.TimeField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Order {self.id} by {self.user.username}'

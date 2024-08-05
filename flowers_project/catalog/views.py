@@ -1,16 +1,14 @@
 # catalog/views.py
 
-from django.shortcuts import redirect, get_object_or_404
-from .models import CartItem  # Предположим, что у вас есть модель CartItem для элементов корзины
-
-from django.shortcuts import render, get_object_or_404, redirect  # Добавьте redirect
+from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Flower, CartItem
+from .models import Flower, CartItem, Order
+from .forms import OrderForm
 
 def flower_catalog(request):
     flowers = Flower.objects.all()
-    print(f"Количество цветов: {flowers.count()}")  # Вывод отладочной информации в консоль сервера
+    print(f"Количество цветов: {flowers.count()}")  # Отладочная информация
     return render(request, 'catalog/flower_catalog.html', {'flowers': flowers})
 
 @login_required
@@ -23,28 +21,53 @@ def add_to_cart(request, flower_id):
     messages.success(request, f"Товар '{flower.name}' добавлен в корзину.")
     return redirect('flower_catalog')
 
+# catalog/views.py
+
 @login_required
 def view_cart(request):
+    cart_items = CartItem.objects.filter(user=request.user)
+    total = sum(item.total_price() for item in cart_items)
+
     if request.method == 'POST':
         # Обновление количества товаров
-        for item in CartItem.objects.filter(user=request.user):
+        for item in cart_items:
             quantity = request.POST.get(f'quantity_{item.id}')
             if quantity:
                 item.quantity = int(quantity)
                 item.save()
+
+        # Проверка на оформление заказа
+        if 'place_order' in request.POST:
+            order_form = OrderForm(request.POST)
+            if order_form.is_valid():
+                order = order_form.save(commit=False)
+                order.user = request.user
+                order.save()
+
+                # Удаляем товары из корзины
+                cart_items.delete()
+
+                messages.success(request, "Ваш заказ успешно оформлен!")
+                return redirect('order_confirmation')
+        else:
+            order_form = OrderForm()
+
         messages.success(request, "Корзина обновлена.")
 
-    cart_items = CartItem.objects.filter(user=request.user)
-    total = sum(item.total_price() for item in cart_items)
-    return render(request, 'catalog/cart.html', {'cart_items': cart_items, 'total': total})
+    else:
+        order_form = OrderForm()
 
+    return render(request, 'catalog/cart.html', {
+        'cart_items': cart_items,
+        'total': total,
+        'order_form': order_form
+    })
 
+@login_required
 def remove_from_cart(request, item_id):
-    # Получаем элемент корзины или возвращаем 404, если его нет
     cart_item = get_object_or_404(CartItem, id=item_id)
-
-    # Удаляем элемент из корзины
     cart_item.delete()
-
-    # Перенаправляем обратно на страницу корзины
     return redirect('view_cart')
+
+def order_confirmation(request):
+    return render(request, 'catalog/order_confirmation.html')

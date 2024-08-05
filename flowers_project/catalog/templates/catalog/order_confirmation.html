@@ -1,0 +1,11 @@
+<!-- catalog/templates/catalog/order_confirmation.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Спасибо за ваш заказ!</h2>
+    <p>Ваш заказ был успешно оформлен. Мы скоро свяжемся с вами для подтверждения деталей доставки.</p>
+    <a href="{% url 'flower_catalog' %}" class="btn btn-primary">Вернуться к каталогу</a>
+</div>
+{% endblock %}
