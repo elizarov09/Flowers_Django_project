@@ -18,7 +18,6 @@ CHAT_ID = 48829372
 # Синхронная функция для отправки сообщений в Telegram
 def send_telegram_message(order, cart_items):
     try:
-        # Создаем сообщение с информацией о заказе
         message = f"Новый заказ!\n\n" \
                   f"Пользователь: {order.user.username}\n" \
                   f"Адрес доставки: {order.delivery_address}\n" \
@@ -30,24 +29,16 @@ def send_telegram_message(order, cart_items):
         total_cost = 0
 
         for item in cart_items:
-            # Отправляем изображение букета
-            if item.flower.image:
-                photo_url = item.flower.image.url
-                photo_data = {
-                    "chat_id": CHAT_ID,
-                    "photo": photo_url,
-                    "caption": f"{item.flower.name} x {item.quantity} ({item.flower.price} руб.)"
-                }
-                photo_response = requests.post(f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto", data=photo_data)
-                if photo_response.status_code != 200:
-                    logger.error(f"Ошибка при отправке изображения: {photo_response.text}")
+            # Логирование для проверки наличия элементов в корзине
+            logger.info(f"Обработка элемента корзины: {item.flower.name}, Количество: {item.quantity}, Цена: {item.flower.price}")
 
+            # Добавление информации о товаре в сообщение
             message += f"- {item.flower.name} x {item.quantity} ({item.flower.price} руб.)\n"
             total_cost += item.total_price()
 
         message += f"\nОбщая стоимость: {total_cost} руб."
 
-        # Отправляем текстовое сообщение с информацией о заказе
+        # Отправка текстового сообщения с информацией о заказе
         url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
         data = {"chat_id": CHAT_ID, "text": message}
         response = requests.post(url, data=data)
@@ -96,11 +87,11 @@ def view_cart(request):
                 order.user = request.user
                 order.save()
 
-                # Удаляем товары из корзины
-                cart_items.delete()
-
                 # Отправка информации в Telegram
                 send_telegram_message(order, cart_items)
+
+                # Удаляем товары из корзины после отправки сообщения
+                cart_items.delete()
 
                 messages.success(request, "Ваш заказ успешно оформлен!")
                 return redirect('order_confirmation')
