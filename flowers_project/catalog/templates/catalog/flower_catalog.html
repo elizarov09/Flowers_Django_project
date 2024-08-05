@@ -6,9 +6,6 @@
 <div class="container mt-5">
     <h2>Каталог цветов</h2>
     <div class="row">
-        {% if flowers %}
-            <p>Обнаружено {{ flowers|length }} цветов.</p> <!-- Отладочный вывод количества цветов -->
-        {% endif %}
         {% for flower in flowers %}
         <div class="col-md-4">
             <div class="card mb-4">
@@ -22,7 +19,6 @@
                     <p class="card-text">{{ flower.description }}</p>
                     <p class="card-text"><strong>Цена: {{ flower.price }} руб.</strong></p>
                     <a href="{% url 'add_to_cart' flower.id %}" class="btn btn-primary" style="background-color: red; color: white; display: block;">Купить</a>
-                    <p>Debug: ID={{ flower.id }}, Name={{ flower.name }}</p> <!-- Отладочная информация -->
                 </div>
             </div>
         </div>
