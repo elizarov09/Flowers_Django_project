@@ -27,7 +27,8 @@ class CartItem(models.Model):
 class Order(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     delivery_address = models.CharField(max_length=255)
-    delivery_datetime = models.DateTimeField(default=timezone.now)
+    delivery_date = models.DateField(default=timezone.now)
+    delivery_time = models.TimeField(default=timezone.now)  # Добавляем время доставки
     comment = models.TextField(blank=True, null=True, verbose_name="Комментарий")
     created_at = models.DateTimeField(auto_now_add=True)
 

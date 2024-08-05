@@ -6,8 +6,9 @@ from .models import Order
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['delivery_address', 'delivery_datetime', 'comment']
+        fields = ['delivery_address', 'delivery_date', 'delivery_time', 'comment']
         widgets = {
-            'delivery_datetime': forms.DateTimeInput(attrs={'type': 'datetime-local'}),
+            'delivery_date': forms.DateInput(attrs={'type': 'date'}),
+            'delivery_time': forms.TimeInput(attrs={'type': 'time'}),
             'comment': forms.Textarea(attrs={'rows': 3}),
         }

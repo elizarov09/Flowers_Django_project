@@ -4,11 +4,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Flower, CartItem, Order
 from .forms import OrderForm
-from aiogram import Bot
+import requests
 import logging
-from asgiref.sync import sync_to_async
-import threading
-import asyncio
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -18,35 +15,49 @@ logger = logging.getLogger(__name__)
 TELEGRAM_BOT_TOKEN = '7474070494:AAEMoP1LWznzTq0Kt2zULf606xVoLbtoD8k'
 CHAT_ID = 48829372
 
-# Асинхронная функция для отправки сообщений в Telegram
-async def send_telegram_message(order, cart_items):
-    bot = Bot(token=TELEGRAM_BOT_TOKEN)
-
+# Синхронная функция для отправки сообщений в Telegram
+def send_telegram_message(order, cart_items):
     try:
+        # Создаем сообщение с информацией о заказе
         message = f"Новый заказ!\n\n" \
                   f"Пользователь: {order.user.username}\n" \
                   f"Адрес доставки: {order.delivery_address}\n" \
-                  f"Дата и время доставки: {order.delivery_datetime}\n" \
-                  f"Комментарий: {order.comment}\n\n" \
+                  f"Дата доставки: {order.delivery_date}\n" \
+                  f"Время доставки: {order.delivery_time}\n" \
+                  f"Комментарий: {order.comment or 'Нет комментария'}\n\n" \
                   f"Товары:\n"
 
+        total_cost = 0
+
         for item in cart_items:
+            # Отправляем изображение букета
+            if item.flower.image:
+                photo_url = item.flower.image.url
+                photo_data = {
+                    "chat_id": CHAT_ID,
+                    "photo": photo_url,
+                    "caption": f"{item.flower.name} x {item.quantity} ({item.flower.price} руб.)"
+                }
+                photo_response = requests.post(f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendPhoto", data=photo_data)
+                if photo_response.status_code != 200:
+                    logger.error(f"Ошибка при отправке изображения: {photo_response.text}")
+
             message += f"- {item.flower.name} x {item.quantity} ({item.flower.price} руб.)\n"
+            total_cost += item.total_price()
 
-        message += f"\nОбщая стоимость: {sum(item.total_price() for item in cart_items)} руб."
+        message += f"\nОбщая стоимость: {total_cost} руб."
 
-        await bot.send_message(chat_id=CHAT_ID, text=message)
-        logger.info("Сообщение успешно отправлено в Telegram.")
+        # Отправляем текстовое сообщение с информацией о заказе
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        data = {"chat_id": CHAT_ID, "text": message}
+        response = requests.post(url, data=data)
+
+        if response.status_code == 200:
+            logger.info("Сообщение успешно отправлено в Telegram.")
+        else:
+            logger.error(f"Ошибка при отправке сообщения в Telegram: {response.text}")
     except Exception as ex:
         logger.error(f"Ошибка при отправке сообщения в Telegram: {ex}")
-    finally:
-        await bot.session.close()
-
-# Функция для запуска асинхронной задачи в потоке
-def run_async(func, *args):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(func(*args))
 
 # Основные представления
 def flower_catalog(request):
@@ -88,8 +99,8 @@ def view_cart(request):
                 # Удаляем товары из корзины
                 cart_items.delete()
 
-                # Запускаем асинхронное отправление сообщения в отдельном потоке
-                threading.Thread(target=run_async, args=(send_telegram_message, order, cart_items)).start()
+                # Отправка информации в Telegram
+                send_telegram_message(order, cart_items)
 
                 messages.success(request, "Ваш заказ успешно оформлен!")
                 return redirect('order_confirmation')
