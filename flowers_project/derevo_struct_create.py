@@ -38,8 +38,8 @@ def save_tree_to_file(dir_path, file_path, max_depth):
 
 # Переменные
 zagolovok = 'Структура файлов и папок проекта "flowers_shop" в формате дерева с разметкой в Markdown'
-papka_project = "../../flowers_shop"  # Замените на путь к вашей папке
-file_out = "for_chat_derevo_project.md"  # Замените на путь к выходному файлу
+papka_project = "/Users/olegelizarov/Documents/GitHub/Flowers_Django_project/flowers_project"  # Замените на путь к вашей папке
+file_out = "/Users/olegelizarov/Documents/GitHub/Flowers_Django_project/README.md"  # Замените на путь к выходному файлу
 urovni = 3  # Максимальный уровень вложенности
 
 # Генерация дерева и сохранение в файл
