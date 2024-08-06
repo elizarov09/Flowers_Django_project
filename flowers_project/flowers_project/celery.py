@@ -1,5 +1,5 @@
 import os
-from celery import Celery
+from flowers_project.flowers_project.celery import Celery
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'your_project_name.settings')
 
