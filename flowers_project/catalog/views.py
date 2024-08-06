@@ -2,7 +2,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Flower, CartItem, Order
+from .models import Flower, CartItem, Order, OrderItem
 from .forms import OrderForm
 import requests
 import logging
@@ -87,6 +87,14 @@ def view_cart(request):
                 order.user = request.user
                 order.save()
 
+                # Сохранение товаров в OrderItem
+                for item in cart_items:
+                    OrderItem.objects.create(
+                        order=order,
+                        flower=item.flower,
+                        quantity=item.quantity
+                    )
+
                 # Отправка информации в Telegram
                 send_telegram_message(order, cart_items)
 
@@ -123,3 +131,30 @@ def order_confirmation(request):
 def order_history(request):
     orders = Order.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'catalog/order_history.html', {'orders': orders})
+
+
+# catalog/views.py
+
+# catalog/views.py
+
+@login_required
+def repeat_order(request, order_id):
+    # Получаем оригинальный заказ
+    original_order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    logger.info(f"Повтор заказа: {original_order.id}, Пользователь: {original_order.user.username}")
+
+    # Удаляем текущие товары из корзины пользователя
+    CartItem.objects.filter(user=request.user).delete()
+
+    # Добавляем товары из OrderItem в корзину
+    for item in original_order.order_items.all():
+        logger.info(f"Добавление товара в корзину: {item.flower.name}, Количество: {item.quantity}")
+        CartItem.objects.create(
+            user=request.user,
+            flower=item.flower,
+            quantity=item.quantity
+        )
+
+    messages.success(request, "Товары из заказа добавлены в вашу корзину.")
+    return redirect('view_cart')

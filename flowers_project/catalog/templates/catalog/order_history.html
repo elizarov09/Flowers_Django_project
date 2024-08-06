@@ -14,6 +14,7 @@
                     <th>Адрес доставки</th>
                     <th>Статус</th>
                     <th>Товары</th>
+                    <th>Действия</th>
                 </tr>
             </thead>
             <tbody>
@@ -29,6 +30,9 @@
                             <li>{{ item.flower.name }} x {{ item.quantity }} - {{ item.total_price }} руб.</li>
                             {% endfor %}
                         </ul>
+                    </td>
+                    <td>
+                        <a href="{% url 'repeat_order' order.id %}" class="btn btn-secondary btn-sm">Повторить заказ</a>
                     </td>
                 </tr>
                 {% endfor %}
