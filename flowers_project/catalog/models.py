@@ -25,6 +25,13 @@ class CartItem(models.Model):
         return self.flower.price * self.quantity
 
 class Order(models.Model):
+    STATUS_CHOICES = [
+        ('PENDING', 'Ожидает обработки'),
+        ('PROCESSING', 'В обработке'),
+        ('SHIPPING', 'В доставке'),
+        ('COMPLETED', 'Выполнен'),
+    ]
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDING', verbose_name="Статус")
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     delivery_address = models.CharField(max_length=255)
     delivery_date = models.DateField(default=timezone.now)
