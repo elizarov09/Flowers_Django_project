@@ -2,8 +2,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from .models import Flower, CartItem, Order, OrderItem
-from .forms import OrderForm
+from .models import Flower, CartItem, Order, OrderItem, Review
+from .forms import OrderForm, ReviewForm
+from django.db.models import Avg
 import requests
 import logging
 
@@ -52,8 +53,7 @@ def send_telegram_message(order, cart_items):
 
 # Основные представления
 def flower_catalog(request):
-    flowers = Flower.objects.all()
-    print(f"Количество цветов: {flowers.count()}")  # Отладочная информация
+    flowers = Flower.objects.annotate(avg_rating=Avg('ratings__rating'))
     return render(request, 'catalog/flower_catalog.html', {'flowers': flowers})
 
 @login_required
@@ -158,3 +158,42 @@ def repeat_order(request, order_id):
 
     messages.success(request, "Товары из заказа добавлены в вашу корзину.")
     return redirect('view_cart')
+
+
+@login_required
+def add_review(request, order_id):
+    order = get_object_or_404(Order, id=order_id, user=request.user)
+
+    if request.method == 'POST':
+        form = ReviewForm(request.POST)
+        if form.is_valid():
+            review = form.save(commit=False)
+            review.order = order
+            review.user = request.user
+            review.save()
+
+            # Сохранение рейтингов для каждого букета в заказе
+            for item in order.order_items.all():
+                rating = request.POST.get(f'rating_{item.flower.id}')
+                if rating:
+                    review.flower_ratings.create(flower=item.flower, rating=int(rating))
+
+            messages.success(request, "Ваш отзыв успешно добавлен.")
+            return redirect('order_history')
+    else:
+        form = ReviewForm()
+
+    return render(request, 'catalog/add_review.html', {
+        'form': form,
+        'order': order
+    })
+
+def reviews(request):
+    reviews = Review.objects.all().order_by('-created_at')
+    return render(request, 'catalog/reviews.html', {'reviews': reviews})
+
+
+def flower_detail(request, flower_id):
+    flower = get_object_or_404(Flower.objects.annotate(avg_rating=Avg('ratings__rating')), id=flower_id)
+    reviews = Review.objects.filter(flower_ratings__flower=flower).order_by('-created_at')
+    return render(request, 'catalog/flower_detail.html', {'flower': flower, 'reviews': reviews})

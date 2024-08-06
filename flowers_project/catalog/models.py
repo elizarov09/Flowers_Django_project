@@ -3,6 +3,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Flower(models.Model):
     name = models.CharField(max_length=100, verbose_name="Название")
@@ -49,3 +50,23 @@ class OrderItem(models.Model):
 
     def __str__(self):
         return f"{self.flower.name} x {self.quantity}"
+
+class Review(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='reviews')
+    text = models.TextField(verbose_name="Отзыв", default="")  # Добавьте default=""
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Review by {self.user.username} for Order {self.order.id}'
+
+class FlowerRating(models.Model):
+    review = models.ForeignKey(Review, on_delete=models.CASCADE, related_name='flower_ratings')
+    flower = models.ForeignKey(Flower, on_delete=models.CASCADE, related_name='ratings')
+    rating = models.IntegerField(
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        verbose_name="Рейтинг"
+    )
+
+    def __str__(self):
+        return f'Rating {self.rating} for {self.flower.name} in Review {self.review.id}'

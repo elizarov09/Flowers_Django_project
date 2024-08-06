@@ -1,0 +1,65 @@
+<!-- catalog/templates/catalog/flower_detail.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-6">
+            {% if flower.image %}
+            <img src="{{ flower.image.url }}" class="img-fluid" alt="{{ flower.name }}">
+            {% else %}
+            <p>Изображение отсутствует</p>
+            {% endif %}
+        </div>
+        <div class="col-md-6">
+            <h2>{{ flower.name }}</h2>
+            <p>{{ flower.description }}</p>
+            <p><strong>Цена: {{ flower.price }} руб.</strong></p>
+            {% if flower.avg_rating %}
+                <p>
+                    Рейтинг:
+                    {% for i in "12345"|make_list %}
+                        {% if forloop.counter <= flower.avg_rating %}
+                            <i class="fas fa-star text-warning"></i>
+                        {% else %}
+                            <i class="far fa-star text-warning"></i>
+                        {% endif %}
+                    {% endfor %}
+                    ({{ flower.avg_rating|floatformat:1 }})
+                </p>
+            {% else %}
+                <p>Нет оценок</p>
+            {% endif %}
+            <a href="{% url 'add_to_cart' flower.id %}" class="btn btn-primary" style="background-color: red; color: white;">Купить</a>
+        </div>
+    </div>
+
+    <h3 class="mt-5">Отзывы</h3>
+    {% for review in reviews %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">{{ review.user.username }}</h5>
+                <p class="card-text">{{ review.text }}</p>
+                <p class="card-text">
+                    {% for rating in review.flower_ratings.all %}
+                        {% if rating.flower == flower %}
+                            Оценка:
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= rating.rating %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-warning"></i>
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+                </p>
+                <p class="card-text"><small class="text-muted">{{ review.created_at|date:"d.m.Y H:i" }}</small></p>
+            </div>
+        </div>
+    {% empty %}
+        <p>Пока нет отзывов об этом букете.</p>
+    {% endfor %}
+</div>
+{% endblock %}

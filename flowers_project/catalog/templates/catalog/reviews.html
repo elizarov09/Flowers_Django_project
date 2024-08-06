@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Отзывы наших клиентов</h2>
+    {% for review in reviews %}
+        <div class="card mb-3">
+            <div class="card-body">
+                <h5 class="card-title">Заказ #{{ review.order.id }}</h5>
+                <p class="card-text">{{ review.text }}</p>
+                <p class="card-text"><small class="text-muted">{{ review.user.username }} - {{ review.created_at|date:"d.m.Y H:i" }}</small></p>
+                <h6>Оценки букетов:</h6>
+                <ul>
+                    {% for rating in review.flower_ratings.all %}
+                        <li>
+                            {{ rating.flower.name }}: 
+                            {% for i in "12345"|make_list %}
+                                {% if forloop.counter <= rating.rating %}
+                                    <i class="fas fa-star text-warning"></i>
+                                {% else %}
+                                    <i class="far fa-star text-warning"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% empty %}
+        <p>Пока нет отзывов.</p>
+    {% endfor %}
+</div>
+{% endblock %}

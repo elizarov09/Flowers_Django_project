@@ -15,6 +15,7 @@
                     <th>Статус</th>
                     <th>Товары</th>
                     <th>Действия</th>
+                    <th>Отзыв</th>
                 </tr>
             </thead>
             <tbody>
@@ -33,6 +34,9 @@
                     </td>
                     <td>
                         <a href="{% url 'repeat_order' order.id %}" class="btn btn-secondary btn-sm">Повторить заказ</a>
+                    </td>
+                    <td>
+                        <a href="{% url 'add_review' order.id %}" class="btn btn-primary btn-sm">Оставить отзыв</a>
                     </td>
                 </tr>
                 {% endfor %}

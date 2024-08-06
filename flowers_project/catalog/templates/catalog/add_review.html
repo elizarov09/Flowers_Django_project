@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Оставить отзыв о заказе #{{ order.id }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+            <label for="id_text">Ваш отзыв:</label>
+            {{ form.text }}
+        </div>
+        
+        <h3>Оценить букеты:</h3>
+        {% for item in order.order_items.all %}
+        <div class="form-group">
+            <label for="rating_{{ item.flower.id }}">{{ item.flower.name }}</label>
+            <select name="rating_{{ item.flower.id }}" id="rating_{{ item.flower.id }}" class="form-control">
+                <option value="">Выберите оценку</option>
+                <option value="1">1 звезда</option>
+                <option value="2">2 звезды</option>
+                <option value="3">3 звезды</option>
+                <option value="4">4 звезды</option>
+                <option value="5">5 звезд</option>
+            </select>
+        </div>
+        {% endfor %}
+        
+        <button type="submit" class="btn btn-primary">Отправить отзыв</button>
+    </form>
+</div>
+{% endblock %}
