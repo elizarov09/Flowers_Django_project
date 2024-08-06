@@ -35,10 +35,8 @@
             </tbody>
         </table>
         <h4>Итог: {{ total }} руб.</h4>
-        <button type="submit" class="btn btn-success mb-3">Обновить корзину</button>
-
-        <!-- Поля для оформления заказа -->
-        <h3>Оформление заказа</h3>
+        <button type="submit" class="btn btn-success">Обновить корзину</button>
+        <h4>Оформление заказа</h4>
         {{ order_form.as_p }}
         <button type="submit" name="place_order" class="btn btn-primary">Оформить заказ</button>
     </form>

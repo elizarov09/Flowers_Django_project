@@ -1,0 +1,41 @@
+<!-- catalog/templates/catalog/order_history.html -->
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>История заказов</h2>
+    {% if orders %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Номер заказа</th>
+                    <th>Дата создания</th>
+                    <th>Адрес доставки</th>
+                    <th>Статус</th>
+                    <th>Товары</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for order in orders %}
+                <tr>
+                    <td>{{ order.id }}</td>
+                    <td>{{ order.created_at }}</td>
+                    <td>{{ order.delivery_address }}</td>
+                    <td>{{ order.get_status_display }}</td>
+                    <td>
+                        <ul>
+                            {% for item in order.cartitem_set.all %}
+                            <li>{{ item.flower.name }} x {{ item.quantity }} - {{ item.total_price }} руб.</li>
+                            {% endfor %}
+                        </ul>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>У вас еще нет заказов.</p>
+    {% endif %}
+</div>
+{% endblock %}

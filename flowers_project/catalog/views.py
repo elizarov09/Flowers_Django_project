@@ -117,3 +117,9 @@ def remove_from_cart(request, item_id):
 
 def order_confirmation(request):
     return render(request, 'catalog/order_confirmation.html')
+
+
+@login_required
+def order_history(request):
+    orders = Order.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'catalog/order_history.html', {'orders': orders})
