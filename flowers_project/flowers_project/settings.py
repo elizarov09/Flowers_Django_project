@@ -113,3 +113,19 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'  # URL, по которому будут доступны медиафайлы
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Путь к директории для хранения медиафайлов
+
+CELERY_BROKER_URL = 'redis://localhost:6379'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379'
+CELERY_ACCEPT_CONTENT = ['application/json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
+
+from celery.schedules import crontab
+
+CELERY_BEAT_SCHEDULE = {
+    'update_daily_report': {
+        'task': 'analytics.tasks.update_daily_report_task',
+        'schedule': crontab(hour=0, minute=0),  # Выполнять каждый день в полночь
+    },
+}
