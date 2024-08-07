@@ -112,3 +112,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 MEDIA_URL = '/media/'  # URL, по которому будут доступны медиафайлы
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Путь к директории для хранения медиафайлов
+
+# Telegram Bot settings
+TELEGRAM_BOT_TOKEN = '7474070494:AAEMoP1LWznzTq0Kt2zULf606xVoLbtoD8k'
+CHAT_ID = 48829372

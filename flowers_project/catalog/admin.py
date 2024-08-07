@@ -42,6 +42,12 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'delivery_address')
     ordering = ('-created_at',)
 
+    def save_model(self, request, obj, form, change):
+        if change and 'status' in form.changed_data:
+            original_status = Order.objects.get(pk=obj.pk).status
+            obj._original_status = original_status
+        super().save_model(request, obj, form, change)
+
 # Перерегистрация всех моделей из стандартного admin.site в наш CustomAdminSite
 for model, model_admin in admin.site._registry.items():
     if model not in admin_site._registry:

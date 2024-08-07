@@ -5,55 +5,16 @@ from django.contrib import messages
 from .models import Flower, CartItem, Order, OrderItem, Review
 from .forms import OrderForm, ReviewForm
 from django.db.models import Avg
-import requests
-import logging
 from django.contrib.auth.decorators import user_passes_test
 from django.db.models import F, Sum
 from django.utils import timezone
 from datetime import datetime, timedelta
+from .utils import send_telegram_message
 
 # Настройка логирования
+import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# Настройки бота
-TELEGRAM_BOT_TOKEN = '7474070494:AAEMoP1LWznzTq0Kt2zULf606xVoLbtoD8k'
-CHAT_ID = 48829372
-
-# Синхронная функция для отправки сообщений в Telegram
-def send_telegram_message(order, cart_items):
-    try:
-        message = f"Новый заказ!\n\n" \
-                  f"Пользователь: {order.user.username}\n" \
-                  f"Адрес доставки: {order.delivery_address}\n" \
-                  f"Дата доставки: {order.delivery_date}\n" \
-                  f"Время доставки: {order.delivery_time}\n" \
-                  f"Комментарий: {order.comment or 'Нет комментария'}\n\n" \
-                  f"Товары:\n"
-
-        total_cost = 0
-
-        for item in cart_items:
-            # Логирование для проверки наличия элементов в корзине
-            logger.info(f"Обработка элемента корзины: {item.flower.name}, Количество: {item.quantity}, Цена: {item.flower.price}")
-
-            # Добавление информации о товаре в сообщение
-            message += f"- {item.flower.name} x {item.quantity} ({item.flower.price} руб.)\n"
-            total_cost += item.total_price()
-
-        message += f"\nОбщая стоимость: {total_cost} руб."
-
-        # Отправка текстового сообщения с информацией о заказе
-        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
-        data = {"chat_id": CHAT_ID, "text": message}
-        response = requests.post(url, data=data)
-
-        if response.status_code == 200:
-            logger.info("Сообщение успешно отправлено в Telegram.")
-        else:
-            logger.error(f"Ошибка при отправке сообщения в Telegram: {response.text}")
-    except Exception as ex:
-        logger.error(f"Ошибка при отправке сообщения в Telegram: {ex}")
 
 # Основные представления
 def flower_catalog(request):
