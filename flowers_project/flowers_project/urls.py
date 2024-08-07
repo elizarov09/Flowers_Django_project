@@ -10,6 +10,7 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('catalog/', include('catalog.urls')),
     path('', include('main.urls')),
+    path('analytics/', include('analytics.urls')),
 ]
 
 if settings.DEBUG:  # Это добавит маршруты для обслуживания медиафайлов

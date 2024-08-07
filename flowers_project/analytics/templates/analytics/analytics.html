@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Аналитика</h1>
+    <div class="analytics-form">
+        <form method="POST">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="col">
+                    {{ form.start_date.label_tag }} {{ form.start_date }}
+                </div>
+                <div class="col">
+                    {{ form.end_date.label_tag }} {{ form.end_date }}
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary">Показать</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    {% if total_revenue %}
+    <div class="results mt-4">
+        <h3>Результаты:</h3>
+        <table class="table">
+            <tr>
+                <th>Общая выручка:</th>
+                <td>{{ total_revenue }} руб.</td>
+            </tr>
+            <tr>
+                <th>Количество заказов:</th>
+                <td>{{ total_orders }}</td>
+            </tr>
+            <tr>
+                <th>Средний чек:</th>
+                <td>{{ average_order_value }} руб.</td>
+            </tr>
+        </table>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
