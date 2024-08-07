@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Отчет администратора</h1>
+
+<form method="get">
+    <label for="start_date">Начальная дата:</label>
+    <input type="date" id="start_date" name="start_date" value="{{ start_date|date:'Y-m-d' }}">
+
+    <label for="end_date">Конечная дата:</label>
+    <input type="date" id="end_date" name="end_date" value="{{ end_date|date:'Y-m-d' }}">
+
+    <button type="submit">Показать отчет</button>
+</form>
+
+<h2>Отчет за период: {{ start_date|date:'d.m.Y' }} - {{ end_date|date:'d.m.Y' }}</h2>
+
+<ul>
+    <li>Выручка за период: {{ daily_revenue|default:0|floatformat:2 }} руб.</li>
+    <li>Количество заказов: {{ order_count }}</li>
+    <li>Средний чек заказа: {{ average_order_value|default:0|floatformat:2 }} руб.</li>
+</ul>
+
+<h3>История заказов:</h3>
+<table>
+    <thead>
+        <tr>
+            <th>ID заказа</th>
+            <th>Пользователь</th>
+            <th>Дата</th>
+            <th>Сумма</th>
+            <th>Статус</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>{{ order.id }}</td>
+            <td>{{ order.user__username }}</td>
+            <td>{{ order.created_at|date:'d.m.Y H:i' }}</td>
+            <td>{{ order.total_price|default:0|floatformat:2 }} руб.</td>
+            <td>{{ order.status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

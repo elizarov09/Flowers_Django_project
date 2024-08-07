@@ -1,0 +1,10 @@
+{% extends "admin/index.html" %}
+
+{% block content %}
+    {{ block.super }}
+    {% if report_link %}
+        <div style="margin-top: 20px;">
+            {{ report_link|safe }}
+        </div>
+    {% endif %}
+{% endblock %}

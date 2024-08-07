@@ -7,6 +7,10 @@ from .forms import OrderForm, ReviewForm
 from django.db.models import Avg
 import requests
 import logging
+from django.contrib.auth.decorators import user_passes_test
+from django.db.models import F, Sum
+from django.utils import timezone
+from datetime import datetime, timedelta
 
 # Настройка логирования
 logging.basicConfig(level=logging.INFO)
@@ -197,3 +201,44 @@ def flower_detail(request, flower_id):
     flower = get_object_or_404(Flower.objects.annotate(avg_rating=Avg('ratings__rating')), id=flower_id)
     reviews = Review.objects.filter(flower_ratings__flower=flower).order_by('-created_at')
     return render(request, 'catalog/flower_detail.html', {'flower': flower, 'reviews': reviews})
+
+# Функция проверки, является ли пользователь администратором
+def is_admin(user):
+    return user.is_authenticated and user.is_staff
+
+
+@user_passes_test(is_admin)
+def admin_report(request):
+    # Получаем параметры даты из запроса или используем последние 30 дней по умолчанию
+    start_date_str = request.GET.get('start_date')
+    end_date_str = request.GET.get('end_date')
+
+    if start_date_str and end_date_str:
+        start_date = datetime.strptime(start_date_str, '%Y-%m-%d').date()
+        end_date = datetime.strptime(end_date_str, '%Y-%m-%d').date()
+    else:
+        end_date = timezone.now().date()
+        start_date = end_date - timedelta(days=30)
+
+    # Фильтруем заказы за выбранный период
+    orders = Order.objects.filter(created_at__date__range=[start_date, end_date])
+
+    # Рассчитываем метрики
+    order_data = orders.annotate(
+        total_price=Sum(F('order_items__flower__price') * F('order_items__quantity'))
+    ).values('id', 'user__username', 'created_at', 'total_price', 'status')
+
+    daily_revenue = sum(order['total_price'] or 0 for order in order_data)
+    order_count = len(order_data)
+    average_order_value = daily_revenue / order_count if order_count > 0 else 0
+
+    context = {
+        'start_date': start_date,
+        'end_date': end_date,
+        'daily_revenue': daily_revenue,
+        'order_count': order_count,
+        'average_order_value': average_order_value,
+        'orders': order_data,
+    }
+
+    return render(request, 'catalog/admin_report.html', context)
