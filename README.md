@@ -10,11 +10,13 @@
 │   ├── apps.py
 │   ├── forms.py
 │   ├── admin.py
+│   ├── utils.py
 │   ├── templates/
 │   │   ├── catalog/
 │   │   │   ├── add_review.html
 │   │   │   ├── order_confirmation.html
 │   │   │   ├── flower_detail.html
+│   │   │   ├── admin_report.html
 │   │   │   ├── order_history.html
 │   │   │   ├── flower_catalog.html
 │   │   │   ├── cart.html
@@ -48,6 +50,8 @@
 │   ├── wsgi.py
 ├── templates/
 │   ├── base.html
+│   ├── admin/
+│   │   ├── index.html
 ├── manage.py
 ├── main/
 │   ├── models.py
