@@ -61,7 +61,7 @@ def view_cart(request):
                     )
 
                 # Отправка информации в Telegram
-                send_telegram_message(order, cart_items)
+                #send_telegram_message(order, cart_items)
 
                 # Удаляем товары из корзины после отправки сообщения
                 cart_items.delete()
